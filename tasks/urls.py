@@ -9,6 +9,7 @@ router.register(r'tasks', views.TaskViewSet, basename='tasks')
 urlpatterns = [
     path('', views.login_view, name='login'),
     path('otp-login/', views.otp_login_view, name='otp_login'),
+    path('register/', views.register_view, name='register'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('task/new/', views.task_form, name='task_create'),
     path('task/<int:task_id>/edit/', views.task_form, name='task_edit'),

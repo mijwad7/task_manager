@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% block title %} - Login{% endblock %}
+{% block title %} - Register{% endblock %}
 {% block content %}
-<h1>Login</h1>
+<h1>Register</h1>
 {% if error %}
     <div class="alert alert-danger">{{ error }}</div>
 {% endif %}
@@ -15,8 +15,11 @@
         <label for="password" class="form-label">Password</label>
         <input type="password" class="form-control" id="password" name="password" required>
     </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-    <a href="{% url 'otp_login' %}" class="btn btn-link">Login with OTP</a>
-    <a href="{% url 'register' %}" class="btn btn-link">Don't have an account? Register</a>
+    <div class="mb-3">
+        <label for="password_confirm" class="form-label">Confirm Password</label>
+        <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Register</button>
+    <a href="{% url 'login' %}" class="btn btn-link">Already have an account? Login</a>
 </form>
 {% endblock %}

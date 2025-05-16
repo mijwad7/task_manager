@@ -27,6 +27,33 @@ class TaskViewSet(viewsets.ModelViewSet):
         # Assign the task to the authenticated user
         serializer.save(user=self.request.user)
 
+
+# User registration view
+def register_view(request):
+    if request.method == 'POST':
+        email = request.POST['email'].lower()
+        password = request.POST['password']
+        password_confirm = request.POST['password_confirm']
+
+        # Validate input
+        if password != password_confirm:
+            return render(request, 'register.html', {'error': 'Passwords do not match'})
+        if len(password) < 8:
+            return render(request, 'register.html', {'error': 'Password must be at least 8 characters long'})
+        if User.objects.filter(email=email).exists():
+            return render(request, 'register.html', {'error': 'Email already registered'})
+
+        # Create user with email as username
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password
+        )
+        user.is_active = True
+        user.save()
+        return redirect('login')
+    return render(request, 'register.html')
+
 def login_view(request):
     if request.method == 'POST':
         email = request.POST['email']
