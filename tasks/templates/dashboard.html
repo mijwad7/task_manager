@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %} - Dashboard{% endblock %}
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+<a href="{% url 'task_create' %}" class="btn btn-primary mb-3">Create Task</a>
+
+<!-- Task List -->
+<h3>Your Tasks</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+        <tr>
+            <td>{{ task.title }}</td>
+            <td>{{ task.due_date|date:"Y-m-d H:i" }}</td>
+            <td>{{ task.status|title }}</td>
+            <td>
+                <a href="{% url 'task_edit' task.id %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'task_delete' task.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No tasks found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Calendar -->
+<h3 class="mt-5">Task Calendar</h3>
+<div id="calendar"></div>
+
+<script>
+    // Pass events to JavaScript
+    const events = {{ events|safe }};
+</script>
+{% endblock %}

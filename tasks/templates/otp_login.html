@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %} - OTP Login{% endblock %}
+{% block content %}
+<h1>Login with OTP</h1>
+{% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" value="{{ email|default_if_none:'' }}" required>
+    </div>
+    {% if otp_sent %}
+    <div class="mb-3">
+        <label for="otp" class="form-label">OTP</label>
+        <input type="text" class="form-control" id="otp" name="otp" required>
+    </div>
+    {% endif %}
+    <button type="submit" class="btn btn-primary">{{ otp_sent|yesno:"Verify OTP,Send OTP" }}</button>
+    <a href="{% url 'login' %}" class="btn btn-link">Login with Password</a>
+</form>
+{% endblock %}
