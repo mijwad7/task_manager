@@ -1,2 +1,2 @@
 #!/bin/bash
-    python manage.py collectstatic --noinput
+D:/Work/Django/task_manager/venv/Scripts/python manage.py collectstatic --noinput
