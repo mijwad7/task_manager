@@ -1,23 +1,36 @@
 {% extends 'base.html' %}
 {% block title %} - OTP Login{% endblock %}
 {% block content %}
-<h1>Login with OTP</h1>
-{% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
-{% endif %}
-<form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <input type="email" class="form-control" id="email" name="email" value="{{ email|default_if_none:'' }}" required>
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h1 class="card-title mb-4 fw-bold text-primary">Login with OTP</h1>
+                {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-semibold">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ email|default_if_none:'' }}" required>
+                    </div>
+                    {% if otp_sent %}
+                    <div class="mb-3">
+                        <label for="otp" class="form-label fw-semibold">OTP</label>
+                        <input type="text" class="form-control" id="otp" name="otp" required>
+                    </div>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold">{{ otp_sent|yesno:"Verify OTP,Send OTP" }}</button>
+                    <div class="mt-3 text-center">
+                        <a href="{% url 'login' %}" class="btn btn-link">Login with Password</a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    {% if otp_sent %}
-    <div class="mb-3">
-        <label for="otp" class="form-label">OTP</label>
-        <input type="text" class="form-control" id="otp" name="otp" required>
-    </div>
-    {% endif %}
-    <button type="submit" class="btn btn-primary">{{ otp_sent|yesno:"Verify OTP,Send OTP" }}</button>
-    <a href="{% url 'login' %}" class="btn btn-link">Login with Password</a>
-</form>
+</div>
 {% endblock %}

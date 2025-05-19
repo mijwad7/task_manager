@@ -1,29 +1,39 @@
 {% extends 'base.html' %}
 {% block title %} - {% if task %}Edit{% else %}Create{% endif %} Task{% endblock %}
 {% block content %}
-<h1>{% if task %}Edit{% else %}Create{% endif %} Task</h1>
-<form method="post">
-    {% csrf_token %}
-    <div class="mb-3">
-        <label for="title" class="form-label">Title</label>
-        <input type="text" class="form-control" id="title" name="title" value="{{ task.title|default_if_none:'' }}" required>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h1 class="card-title mb-4 fw-bold text-primary">{% if task %}Edit{% else %}Create{% endif %} Task</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-semibold">Title</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ task.title|default_if_none:'' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4">{{ task.description|default_if_none:'' }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="due_date" class="form-label fw-semibold">Due Date</label>
+                        <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="{{ task.due_date|date:'Y-m-d\\TH:i' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label fw-semibold">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary fw-semibold">Save</button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary fw-semibold">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        <label for="description" class="form-label">Description</label>
-        <textarea class="form-control" id="description" name="description">{{ task.description|default_if_none:'' }}</textarea>
-    </div>
-    <div class="mb-3">
-        <label for="due_date" class="form-label">Due Date</label>
-        <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="{{ task.due_date|date:'Y-m-d\\TH:i' }}" required>
-    </div>
-    <div class="mb-3">
-        <label for="status" class="form-label">Status</label>
-        <select class="form-control" id="status" name="status">
-            <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>Pending</option>
-            <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Save</button>
-    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
-</form>
+</div>
 {% endblock %}

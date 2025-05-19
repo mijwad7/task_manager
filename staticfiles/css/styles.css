@@ -1,6 +1,22 @@
+:root {
+  --bs-primary: #0b2447 !important;
+  --bs-secondary: #1d3557 !important; /* Adjusted secondary color */
+}
+
+.btn-primary, .form-button, .bg-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.link-primary, .text-primary {
+    color: var(--bs-primary) !important;
+    text-decoration: none !important;
+}
 body {
     background-color: #f8f9fa;
+    font-family: "Poppins";
 }
+
 
 .navbar {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
