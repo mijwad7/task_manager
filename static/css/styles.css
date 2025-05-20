@@ -38,3 +38,28 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.fc {
+    max-width: 100%;
+}
+
+.fc .fc-daygrid-day {
+    background-color: #ffffff;
+    border-radius: 0.25rem;
+}
+
+.fc .fc-event {
+    border-radius: 0.25rem;
+    padding: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.modal-content {
+    border-radius: 0.5rem;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

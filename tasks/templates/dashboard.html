@@ -30,7 +30,7 @@
                         </td>
                         <td>
                             <a href="{% url 'task_edit' task.id %}" class="btn btn-sm btn-outline-warning me-1">Edit</a>
-                            <a href="{% url 'task_delete' task.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-task-id="{{ task.id }}" data-task-title="{{ task.title }}">Delete</button>
                         </td>
                     </tr>
                     {% empty %}
@@ -50,10 +50,64 @@
             </div>
         </div>
 
+        <!-- Event Details Modal -->
+        <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold text-primary" id="eventModalLabel">Task Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Title:</strong> <span id="eventTitle"></span></p>
+                        <p><strong>Due Date:</strong> <span id="eventDueDate"></span></p>
+                        <p><strong>Status:</strong> <span id="eventStatus"></span></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold text-danger" id="deleteModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete the task "<span id="deleteTaskTitle"></span>"?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form id="deleteForm" method="post" action="">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script>
             // Pass events to JavaScript
             console.log('Events from template:', {{ events|safe }});
             const events = {{ events|safe }};
+
+            // Handle delete modal
+            document.querySelectorAll('[data-bs-target="#deleteModal"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const taskId = this.getAttribute('data-task-id');
+                    const taskTitle = this.getAttribute('data-task-title');
+                    const deleteForm = document.getElementById('deleteForm');
+                    const deleteTaskTitle = document.getElementById('deleteTaskTitle');
+                    deleteForm.action = `{% url 'task_delete' 0 %}`.replace('0', taskId);
+                    deleteTaskTitle.textContent = taskTitle;
+                });
+            });
         </script>
     </div>
 </div>
