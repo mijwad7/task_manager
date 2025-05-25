@@ -2,10 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from rest_framework import viewsets, permissions, status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
+from rest_framework import viewsets, permissions
 from .models import Task, UserProfile
 from .serializers import TaskSerializer
 from django.core.mail import send_mail
@@ -14,6 +11,7 @@ from datetime import datetime, timedelta
 import json
 from django.utils import timezone
 from django.views.decorators.cache import cache_control
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 # Task API ViewSet for CRUD operations
@@ -138,7 +136,16 @@ def otp_login_view(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def dashboard(request):
-    tasks = Task.objects.filter(user=request.user)
+    tasks = Task.objects.filter(user=request.user).order_by('-due_date')
+    paginator = Paginator(tasks, 10)  # Show 10 tasks per page
+    page_number = request.GET.get('page')
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
     events = [
         {
             "title": task.title,
@@ -149,9 +156,12 @@ def dashboard(request):
         for task in tasks
     ]
     return render(
-        request, "dashboard.html", {"tasks": tasks, "events": json.dumps(events)}
+        request, "dashboard.html", {
+            "tasks": page_obj,
+            "events": json.dumps(events),
+            "page_obj": page_obj
+        }
     )
-
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
