@@ -7,12 +7,9 @@ from .models import Task, UserProfile
 from .serializers import TaskSerializer
 from django.core.mail import send_mail
 import random
-from datetime import datetime, timedelta
-import json
+from datetime import timedelta
 from django.utils import timezone
 from django.views.decorators.cache import cache_control
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 
 # Task API ViewSet for CRUD operations
 class TaskViewSet(viewsets.ModelViewSet):
@@ -20,11 +17,10 @@ class TaskViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Task.objects.filter(user=self.request.user)
+        return Task.objects.filter(user=self.request.user).order_by('-due_date')
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
 
 # User registration view
 def register_view(request):
@@ -56,7 +52,6 @@ def register_view(request):
         return redirect("login")
     return render(request, "register.html")
 
-
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def login_view(request):
     if request.user.is_authenticated:
@@ -75,7 +70,6 @@ def login_view(request):
         except User.DoesNotExist:
             return render(request, "login.html", {"error": "Email not found"})
     return render(request, "login.html")
-
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def otp_login_view(request):
@@ -132,73 +126,10 @@ def otp_login_view(request):
 
     return render(request, "otp_login.html")
 
-
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def dashboard(request):
-    tasks = Task.objects.filter(user=request.user).order_by('-due_date')
-    paginator = Paginator(tasks, 10)  # Show 10 tasks per page
-    page_number = request.GET.get('page')
-    try:
-        page_obj = paginator.page(page_number)
-    except PageNotAnInteger:
-        page_obj = paginator.page(1)
-    except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)
-
-    events = [
-        {
-            "title": task.title,
-            "start": task.due_date.isoformat() if task.due_date else timezone.now().isoformat(),
-            "id": task.id,
-            "status": task.status,
-        }
-        for task in tasks
-    ]
-    return render(
-        request, "dashboard.html", {
-            "tasks": page_obj,
-            "events": json.dumps(events),
-            "page_obj": page_obj
-        }
-    )
-
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
-@login_required
-def task_form(request, task_id=None):
-    task = Task.objects.get(id=task_id, user=request.user) if task_id else None
-    if request.method == "POST":
-        title = request.POST["title"]
-        description = request.POST["description"]
-        due_date = request.POST["due_date"]
-        status = request.POST.get("status", "pending")
-
-        if task:
-            task.title = title
-            task.description = description
-            task.due_date = due_date
-            task.status = status
-            task.save()
-        else:
-            Task.objects.create(
-                user=request.user,
-                title=title,
-                description=description,
-                due_date=due_date,
-                status=status,
-            )
-        return redirect("dashboard")
-    return render(request, "task_form.html", {"task": task})
-
-
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
-@login_required
-def delete_task(request, task_id):
-    task = Task.objects.get(id=task_id, user=request.user)
-    if request.method == "POST":
-        task.delete()
-    return redirect("dashboard")
-
+    return render(request, "dashboard.html")
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def logout_view(request):
