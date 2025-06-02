@@ -184,32 +184,38 @@ document.addEventListener("DOMContentLoaded", function () {
     })
       .then((response) => {
         if (!response.ok) throw new Error("Failed to save task");
+        return response.json();
+      })
+      .then(() => {
+        // Close modal and clean up
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("taskModal")
         );
-        modal.hide();
-        // Ensure backdrop is removed
+        if (modal) modal.hide();
+        // Forcefully remove backdrop and modal-open class
         document.body.classList.remove("modal-open");
-        const backdrop = document.querySelector(".modal-backdrop");
-        if (backdrop) backdrop.remove();
+        document.body.style.overflow = "";
+        document.body.style.paddingRight = "";
+        const backdrops = document.querySelectorAll(".modal-backdrop");
+        backdrops.forEach((backdrop) => backdrop.remove());
         loadTasks();
       })
       .catch((error) => {
         console.error("Error:", error);
         alert("Failed to save task.");
-        // Close modal and remove backdrop on error
+        // Close modal and clean up
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("taskModal")
         );
-        if (modal) {
-          modal.hide();
-          document.body.classList.remove("modal-open");
-          const backdrop = document.querySelector(".modal-backdrop");
-          if (backdrop) backdrop.remove();
-        }
+        if (modal) modal.hide();
+        // Forcefully remove backdrop and modal-open class
+        document.body.classList.remove("modal-open");
+        document.body.style.overflow = "";
+        document.body.style.paddingRight = "";
+        const backdrops = document.querySelectorAll(".modal-backdrop");
+        backdrops.forEach((backdrop) => backdrop.remove());
       });
   });
-
   // Handle delete modal
   document.addEventListener("click", function (e) {
     if (e.target.matches('[data-bs-target="#deleteModal"]')) {
