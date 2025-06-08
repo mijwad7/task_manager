@@ -36,7 +36,7 @@ function loadTasks() {
       return response.json();
     })
     .then((data) => {
-      const tasks = data.results || data; // Handle possible pagination
+      const tasks = data.results || data;
       const tbody = document.getElementById("taskTableBody");
       tbody.innerHTML = "";
       if (tasks.length === 0) {
