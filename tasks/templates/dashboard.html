@@ -18,20 +18,20 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="taskTableBody"></tbody>
+                <tbody id="taskTableBody">
+                    <tr id="loadingSpinner" style="display: none;">
+                        <td colspan="4" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
 
-        <!-- Calendar -->
-        <h3 class="mt-5 mb-3 fw-semibold">Task Calendar</h3>
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <div id="calendar"></div>
-            </div>
-        </div>
-
         <!-- Task Create/Edit Modal -->
-        <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel">
+        <div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -53,13 +53,6 @@
                                 <label for="taskDueDate" class="form-label fw-semibold">Due Date</label>
                                 <input type="datetime-local" class="form-control" id="taskDueDate" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="taskStatus" class="form-label fw-semibold">Status</label>
-                                <select class="form-control" id="taskStatus">
-                                    <option value="pending">Pending</option>
-                                    <option value="completed">Completed</option>
-                                </select>
-                            </div>
                             <button type="submit" class="btn btn-primary w-100 fw-semibold">Save Task</button>
                         </form>
                     </div>
@@ -68,7 +61,7 @@
         </div>
 
         <!-- Event Details Modal -->
-        <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel">
+        <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -89,7 +82,7 @@
         </div>
 
         <!-- Delete Confirmation Modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel">
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -108,6 +101,5 @@
         </div>
     </div>
 </div>
-<!-- Custom JS -->
 <script src="/static/js/tasks.js"></script>
 {% endblock %}

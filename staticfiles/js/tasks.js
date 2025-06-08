@@ -28,15 +28,33 @@ function formatDate(dateStr) {
   });
 }
 
+// Show loading spinner
+function showLoading() {
+  const spinner = document.getElementById("loadingSpinner");
+  if (spinner) {
+    spinner.style.display = "table-row";
+  }
+}
+
+// Hide loading spinner
+function hideLoading() {
+  const spinner = document.getElementById("loadingSpinner");
+  if (spinner) {
+    spinner.style.display = "none";
+  }
+}
+
 // Load tasks from API
 function loadTasks() {
+  showLoading();
   fetch("/api/tasks/")
     .then((response) => {
       if (!response.ok) throw new Error("Failed to fetch tasks");
       return response.json();
     })
     .then((data) => {
-      const tasks = data.results || data; // Handle possible pagination
+      hideLoading();
+      const tasks = data.results || data;
       const tbody = document.getElementById("taskTableBody");
       tbody.innerHTML = "";
       if (tasks.length === 0) {
@@ -46,37 +64,33 @@ function loadTasks() {
         tasks.forEach((task) => {
           const row = document.createElement("tr");
           row.innerHTML = `
-                        <td>${task.title}</td>
-                        <td>${formatDate(task.due_date)}</td>
-                        <td>
-                            <span class="badge ${
-                              task.status === "completed"
-                                ? "bg-success"
-                                : "bg-warning"
-                            }">
-                                ${
-                                  task.status.charAt(0).toUpperCase() +
-                                  task.status.slice(1)
-                                }
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-warning me-1" onclick="openTaskModal(${
-                              task.id
-                            })">Edit</button>
-                            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-task-id="${
-                              task.id
-                            }" data-task-title="${task.title}">Delete</button>
-                        </td>
-                    `;
+            <td>${task.title}</td>
+            <td>${formatDate(task.due_date)}</td>
+            <td>
+              <input type="checkbox" class="task-status-checkbox" data-task-id="${
+                task.id
+              }" ${task.status === "completed" ? "checked" : ""}>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-warning me-1" onclick="openTaskModal(${
+                task.id
+              })">Edit</button>
+              <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-task-id="${
+                task.id
+              }" data-task-title="${task.title}">Delete</button>
+            </td>
+          `;
           tbody.appendChild(row);
         });
       }
       loadCalendar(tasks);
     })
     .catch((error) => {
+      hideLoading();
       console.error("Error:", error);
       alert("Failed to load tasks.");
+      document.getElementById("taskTableBody").innerHTML =
+        '<tr><td colspan="4" class="text-center text-muted">Error loading tasks.</td></tr>';
     });
 }
 
@@ -124,28 +138,29 @@ function openTaskModal(taskId = null) {
   const title = document.getElementById("taskTitle");
   const description = document.getElementById("taskDescription");
   const dueDate = document.getElementById("taskDueDate");
-  const status = document.getElementById("taskStatus");
   const taskIdInput = document.getElementById("taskId");
   const modalTitle = document.getElementById("taskModalLabel");
 
   if (taskId) {
     modalTitle.textContent = "Edit Task";
+    showLoading();
     fetch(`/api/tasks/${taskId}/`)
       .then((response) => {
         if (!response.ok) throw new Error("Failed to fetch task");
         return response.json();
       })
       .then((task) => {
+        hideLoading();
         taskIdInput.value = task.id;
         title.value = task.title;
         description.value = task.description || "";
         dueDate.value = task.due_date
           ? new Date(task.due_date).toISOString().slice(0, 16)
           : "";
-        status.value = task.status;
         modal.show();
       })
       .catch((error) => {
+        hideLoading();
         console.error("Error:", error);
         alert("Failed to load task.");
       });
@@ -169,7 +184,6 @@ document.addEventListener("DOMContentLoaded", function () {
       title: document.getElementById("taskTitle").value,
       description: document.getElementById("taskDescription").value,
       due_date: document.getElementById("taskDueDate").value,
-      status: document.getElementById("taskStatus").value,
     };
 
     const method = taskId ? "PUT" : "POST";
@@ -187,12 +201,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then(() => {
-        // Close modal and clean up
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("taskModal")
         );
         if (modal) modal.hide();
-        // Forcefully remove backdrop and modal-open class
         document.body.classList.remove("modal-open");
         document.body.style.overflow = "";
         document.body.style.paddingRight = "";
@@ -203,12 +215,10 @@ document.addEventListener("DOMContentLoaded", function () {
       .catch((error) => {
         console.error("Error:", error);
         alert("Failed to save task.");
-        // Close modal and clean up
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("taskModal")
         );
         if (modal) modal.hide();
-        // Forcefully remove backdrop and modal-open class
         document.body.classList.remove("modal-open");
         document.body.style.overflow = "";
         document.body.style.paddingRight = "";
@@ -216,6 +226,51 @@ document.addEventListener("DOMContentLoaded", function () {
         backdrops.forEach((backdrop) => backdrop.remove());
       });
   });
+
+  // Handle task status checkbox changes
+  document.addEventListener("change", function (e) {
+    if (e.target.matches(".task-status-checkbox")) {
+      const taskId = e.target.getAttribute("data-task-id");
+      const isChecked = e.target.checked;
+      e.target.disabled = true;
+      fetch(`/api/tasks/${taskId}/`)
+        .then((response) => {
+          if (!response.ok) throw new Error("Failed to fetch task");
+          return response.json();
+        })
+        .then((task) => {
+          const taskData = {
+            title: task.title,
+            description: task.description || "",
+            due_date: task.due_date,
+            status: isChecked ? "completed" : "pending",
+          };
+          return fetch(`/api/tasks/${taskId}/`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrftoken,
+            },
+            body: JSON.stringify(taskData),
+          });
+        })
+        .then((response) => {
+          if (!response.ok) throw new Error("Failed to update task status");
+          return response.json();
+        })
+        .then(() => {
+          e.target.disabled = false;
+          loadTasks();
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Failed to update task status.");
+          e.target.disabled = false;
+          e.target.checked = !isChecked;
+        });
+    }
+  });
+
   // Handle delete modal
   document.addEventListener("click", function (e) {
     if (e.target.matches('[data-bs-target="#deleteModal"]')) {
